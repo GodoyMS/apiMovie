@@ -1,6 +1,9 @@
 import s from "./style.module.css";
 
+import { LogoImg ,LogoContainer,Title  } from "./styledLogo";
+
 // STATELESS / SIN ESTADO / SIN COMPORTAMIENTO PROPIO
+
 const Logo = ({ title, image }) => (
   <div>
     <div className={s.container}>
@@ -10,4 +13,15 @@ const Logo = ({ title, image }) => (
   </div>
 );
 
+/*
+const Logo = ({ title, image }) => (
+  <div>
+      <LogoContainer>
+        <LogoImg src={image}/>
+        <Title >{title}</Title>
+      </LogoContainer>
+    
+  </div>
+);
+*/
 export default Logo;

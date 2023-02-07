@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useMemo} from "react";
 import Logo from "./components/Logo/Logo";
 import SearchBar from "./components/SearchBar/SearchBar";
 import TVShowDetail from "./components/TVShowDetail/TVShowDetail";
@@ -11,19 +11,70 @@ import s from "./style.module.css";
 // STATEFULL - CON ESTADO / COMPORTAMIENTO
 function App() {
   const [currentTVShow, setCurrentTVShow] = useState();
+  const [recommendationList, setRecommendationList] = useState([]);
 
+  // NORMAL VERSION 
+  /*
   async function fetchPopulars() {
     const popularTVShowList = await TVShowAPI.fetchPopulars();
-    if (popularTVShowList && popularTVShowList.length > 0) {
+    if (popularTVShowList.length > 0) {
       setCurrentTVShow(popularTVShowList[0]);
     }
+  }*/
+
+  //USE CALLBACK VERSION /RESULT = FETCHPOPULARS FUNCTION
+ /*
+  const fetchPopulars=useCallback( async()=>{
+    const popularTVShowList = await TVShowAPI.fetchPopulars();
+    if (popularTVShowList.length > 0) {
+      setCurrentTVShow(popularTVShowList[0]);
+    }
+
+  },[currentTVShow])
+
+  */
+
+  //USEMEMO VERSION  /RESULT = CURRENT TV SHOW DATA
+
+const fetchPopulars=useMemo(()=>{
+  return async()=>{
+    const popularTVShowList = await TVShowAPI.fetchPopulars();
+    if (popularTVShowList.length > 0) {
+      setCurrentTVShow(popularTVShowList[0]);
+    }
+
   }
+})
+
+
+
+
+
+
+
+
+
+
+
 
   async function fetchByTitle(title) {
     const searchResponse = await TVShowAPI.fetchByTitle(title);
-    if (searchResponse && searchResponse.length > 0) {
+    if (searchResponse.length > 0) {
       setCurrentTVShow(searchResponse[0]);
     }
+  }
+
+  async function fetchRecommendations(tvShowId) {
+    const recommendationListResp = await TVShowAPI.fetchRecommendations(
+      tvShowId
+    );
+    if (recommendationListResp.length > 0) {
+      setRecommendationList(recommendationListResp.slice(0, 10));
+    }
+  }
+
+  function updateCurrentTVShow(tvShow) {
+    setCurrentTVShow(tvShow);
   }
 
   console.log(currentTVShow);
@@ -31,6 +82,12 @@ function App() {
   useEffect(() => {
     fetchPopulars();
   }, []);
+
+  useEffect(() => {
+    if (currentTVShow) {
+      fetchRecommendations(currentTVShow.id);
+    }
+  }, [currentTVShow]);
 
   return (
     <div
@@ -56,7 +113,12 @@ function App() {
         {currentTVShow && <TVShowDetail tvShow={currentTVShow} />}
       </div>
       <div className={s.recommended_shows}>
-        {currentTVShow && <TVShowList />}
+        {currentTVShow && (
+          <TVShowList
+            onClickItem={updateCurrentTVShow}
+            tvShowList={recommendationList}
+          />
+        )}
       </div>
     </div>
   );
